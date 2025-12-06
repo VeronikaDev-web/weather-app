@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>V.Dev — Weather App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg-main: #050509;
+      --bg-alt: #101018;
+      --card-bg: #080812;
+      --text-main: #f5f5f5;
+      --text-muted: #b3b3b3;
+      --accent: #d4af37;
+      --accent-soft: rgba(212, 175, 55, 0.16);
+      --border-soft: rgba(255, 255, 255, 0.08);
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.7);
+      --max-width: 960px;
+      --transition-fast: 0.2s ease-out;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #24243e 0, #050509 52%, #020207 100%);
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* HEADER */
+
+    header {
+      border-bottom: 1px solid var(--border-soft);
+      backdrop-filter: blur(12px);
+      background: rgba(5, 5, 9, 0.92);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .logo-mark {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      box-shadow: 0 0 18px rgba(212, 175, 55, 0.5);
+    }
+
+    .logo span {
+      color: var(--text-muted);
+    }
+
+    .header-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* MAIN */
+
+    main {
+      flex: 1;
+      padding: 2.2rem 0 2.5rem;
+    }
+
+    .intro {
+      margin-bottom: 1.8rem;
+    }
+
+    .eyebrow {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .title {
+      font-size: 1.7rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .subtitle {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      max-width: 30rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.2fr);
+      gap: 1.6rem;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 840px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* SEARCH */
+
+    .search-card {
+      background: linear-gradient(145deg, var(--bg-alt), #050509);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      padding: 1.2rem 1.3rem 1.3rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .search-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .input {
+      flex: 1;
+      min-width: 0;
+      padding: 0.55rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: rgba(5, 5, 9, 0.9);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+      transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        background var(--transition-fast);
+    }
+
+    .input::placeholder {
+      color: #6f6f7a;
+    }
+
+    .input:focus {
+      border-color: rgba(212, 175, 55, 0.7);
+      box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.3);
+      background: rgba(5, 5, 9, 0.98);
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.85rem;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      background: linear-gradient(135deg, var(--accent), #f5e2a9);
+      color: #050509;
+      padding: 0.45rem 1.1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        filter var(--transition-fast),
+        opacity var(--transition-fast);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.7);
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+      box-shadow: 0 18px 34px rgba(0, 0, 0, 0.85);
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+
+    .hint span {
+      color: var(--accent);
+    }
+
+    /* CURRENT WEATHER */
+
+    .current-card {
+      background: radial-gradient(circle at top, rgba(212,175,55,0.18), rgba(8, 8, 12, 0.96));
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      box-shadow: var(--shadow-soft);
+      padding: 1.2rem 1.3rem 1.3rem;
+      margin-bottom: 1.1rem;
+      min-height: 160px;
+    }
+
+    .current-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.8rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .current-location {
+      font-size: 1rem;
+    }
+
+    .current-meta {
+      font-size: 0.8rem;
+      color: #f5e7c0;
+    }
+
+    .current-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .current-temp {
+      font-size: 2.4rem;
+      font-weight: 600;
+    }
+
+    .current-desc {
+      font-size: 0.9rem;
+      color: #f7ebc6;
+    }
+
+    .current-extra {
+      font-size: 0.85rem;
+      color: #f0deae;
+      text-align: right;
+    }
+
+    .current-extra div + div {
+      margin-top: 0.2rem;
+    }
+
+    /* STATUS / ERROR */
+
+    .status {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+      min-height: 1.2em;
+    }
+
+    .status.error {
+      color: #ff9c9c;
+    }
+
+    /* FORECAST */
+
+    .forecast-card {
+      background: linear-gradient(145deg, var(--bg-alt), #050509);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      padding: 1.1rem 1.2rem 1.2rem;
+    }
+
+    .forecast-title {
+      font-size: 0.98rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .forecast-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.7rem;
+    }
+
+    @media (max-width: 600px) {
+      .forecast-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 420px) {
+      .forecast-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .forecast-item {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-soft);
+      padding: 0.6rem 0.7rem;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        border-color var(--transition-fast);
+    }
+
+    .forecast-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.8);
+      border-color: rgba(212, 175, 55, 0.45);
+    }
+
+    .forecast-date {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .forecast-desc {
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+
+    .forecast-temps {
+      font-size: 0.8rem;
+      color: var(--text-main);
+    }
+
+    .forecast-temps span {
+      color: #f5e7c0;
+    }
+
+    /* SIDEBAR INFO */
+
+    .side-card {
+      background: linear-gradient(150deg, #080812, #050509);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      padding: 1rem 1.1rem 1.1rem;
+      box-shadow: var(--shadow-soft);
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    .side-title {
+      font-size: 0.94rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .side-card p + p {
+      margin-top: 0.35rem;
+    }
+
+    /* FOOTER */
+
+    footer {
+      border-top: 1px solid var(--border-soft);
+      padding: 1rem 0 1.4rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="container header-inner">
+        <div class="logo">
+          <div class="logo-mark">V</div>
+          <span>V.Dev · Weather App</span>
+        </div>
+        <div class="header-meta">
+          Demo-проект: приложение прогноза погоды (Open-Meteo API)
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="intro">
+          <div class="eyebrow">demo-проект</div>
+          <h1 class="title">Погода по названию города</h1>
+          <p class="subtitle">
+            Учебное веб-приложение: вводите город, приложение находит координаты, запрашивает погоду с API и показывает
+            текущие условия и краткий прогноз.
+          </p>
+        </div>
+
+        <div class="layout">
+          <div>
+            <!-- SEARCH -->
+            <section class="search-card" aria-label="Поиск города">
+              <div class="search-label">Введите название города (например: Gorzów Wielkopolski, Warsaw, Berlin):</div>
+              <div class="search-row">
+                <input
+                  type="text"
+                  id="city-input"
+                  class="input"
+                  placeholder="Например: Gorzów Wielkopolski"
+                />
+                <button class="btn" id="search-btn">
+                  Показать погоду
+                </button>
+              </div>
+              <div class="hint">
+                Используется открытый API <span>Open-Meteo</span> без ключей. Названия городов можно вводить на любых языках.
+              </div>
+              <div id="status" class="status"></div>
+            </section>
+
+            <!-- CURRENT WEATHER -->
+            <section class="current-card" aria-label="Текущая погода">
+              <div class="current-header">
+                <div class="current-location" id="current-location">
+                  Погода ещё не загружена
+                </div>
+                <div class="current-meta" id="current-meta">
+                  Укажите город, чтобы увидеть данные.
+                </div>
+              </div>
+              <div class="current-main">
+                <div>
+                  <div class="current-temp" id="current-temp">--°C</div>
+                  <div class="current-desc" id="current-desc">Ожидаю запрос...</div>
+                </div>
+                <div class="current-extra" id="current-extra">
+                  <div>Ветер: —</div>
+                  <div>Ощущается как: —</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- FORECAST -->
+            <section class="forecast-card" aria-label="Прогноз">
+              <div class="forecast-title">Краткий прогноз на ближайшие дни</div>
+              <div id="forecast-grid" class="forecast-grid">
+                <!-- Прогноз заполнится скриптом -->
+              </div>
+            </section>
+          </div>
+
+          <!-- SIDE INFO -->
+          <aside class="side-card">
+            <div class="side-title">О проекте</div>
+            <p>
+              Это учебное приложение показывает, что разработчик умеет работать с внешними API: делать запросы, обрабатывать
+              ответы и отображать данные в интерфейсе.
+            </p>
+            <p>
+              Используется:
+              <br />— <strong>JavaScript</strong> (fetch, async/await)<br />
+              — <strong>Open-Meteo API</strong> (без ключей)<br />
+              — адаптивная верстка и аккуратный интерфейс.
+            </p>
+            <p>
+              Такой проект хорошо смотрится в портфолио junior-разработчика и показывает, что можно доверять задачи с простой
+              логикой и интеграциями.
+            </p>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <div>Проект: V.Dev Weather App · 2025</div>
+        <div>Demo для портфолио: работа с API и отображение данных.</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const cityInput = document.getElementById("city-input");
+    const searchBtn = document.getElementById("search-btn");
+    const statusEl = document.getElementById("status");
+
+    const locationEl = document.getElementById("current-location");
+    const metaEl = document.getElementById("current-meta");
+    const tempEl = document.getElementById("current-temp");
+    const descEl = document.getElementById("current-desc");
+    const extraEl = document.getElementById("current-extra");
+    const forecastGrid = document.getElementById("forecast-grid");
+
+    const weatherCodeMap = {
+      0: "Ясно",
+      1: "Преимущественно ясно",
+      2: "Переменная облачность",
+      3: "Пасмурно",
+      45: "Туман",
+      48: "Иней / туман",
+      51: "Лёгкая морось",
+      53: "Умеренная морось",
+      55: "Сильная морось",
+      61: "Лёгкий дождь",
+      63: "Дождь",
+      65: "Сильный дождь",
+      71: "Лёгкий снег",
+      73: "Снег",
+      75: "Сильный снег",
+      80: "Ливневый дождь",
+      81: "Сильный ливень",
+      82: "Очень сильный ливень",
+      95: "Гроза",
+      96: "Гроза с градом",
+      99: "Сильная гроза с градом"
+    };
+
+    function setStatus(message, isError = false) {
+      statusEl.textContent = message || "";
+      statusEl.classList.toggle("error", isError);
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("ru-RU", {
+        weekday: "short",
+        day: "2-digit",
+        month: "2-digit"
+      });
+    }
+
+    async function fetchWeather(city) {
+      if (!city || !city.trim()) {
+        setStatus("Пожалуйста, введите название города.", true);
+        return;
+      }
+
+      setStatus("Ищу город и загружаю погоду...");
+      forecastGrid.innerHTML = "";
+      tempEl.textContent = "--°C";
+      descEl.textContent = "Ожидаю данные...";
+      extraEl.innerHTML = '<div>Ветер: —</div><div>Ощущается как: —</div>';
+
+      try {
+        // 1. Геокодинг
+        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+          city.trim()
+        )}&count=1&language=ru&format=json`;
+
+        const geoRes = await fetch(geoUrl);
+        if (!geoRes.ok) {
+          throw new Error("Ошибка запроса геоданных.");
+        }
+
+        const geoData = await geoRes.json();
+
+        if (!geoData.results || geoData.results.length === 0) {
+          setStatus("Город не найден. Попробуйте изменить написание.", true);
+          locationEl.textContent = "Город не найден";
+          metaEl.textContent = "Попробуйте указать страну или ближайший крупный город.";
+          descEl.textContent = "Нет данных.";
+          return;
+        }
+
+        const place = geoData.results[0];
+        const { latitude, longitude, name, country, timezone } = place;
+
+        // 2. Погода
+        const weatherUrl =
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}` +
+          `&longitude=${longitude}` +
+          `&current_weather=true` +
+          `&hourly=apparent_temperature` +
+          `&daily=temperature_2m_max,temperature_2m_min,weathercode` +
+          `&timezone=${encodeURIComponent(timezone)}`;
+
+        const weatherRes = await fetch(weatherUrl);
+        if (!weatherRes.ok) {
+          throw new Error("Ошибка запроса погоды.");
+        }
+
+        const weatherData = await weatherRes.json();
+
+        const current = weatherData.current_weather;
+        const daily = weatherData.daily;
+        const hourly = weatherData.hourly;
+
+        // текущая погода
+        const currentTemp = current.temperature;
+        const currentWind = current.windspeed;
+        const currentCode = current.weathercode;
+        const currentTime = current.time;
+
+        let apparent = null;
+        if (hourly && hourly.time && hourly.apparent_temperature) {
+          const idx = hourly.time.indexOf(currentTime);
+          if (idx !== -1) {
+            apparent = hourly.apparent_temperature[idx];
+          }
+        }
+
+        const desc = weatherCodeMap[currentCode] || "Погода";
+
+        locationEl.textContent = `${name}, ${country || ""}`.trim();
+        metaEl.textContent = `Локальное время: ${new Date(currentTime).toLocaleString("ru-RU", {
+          hour: "2-digit",
+          minute: "2-digit"
+        })} · Таймзона: ${timezone}`;
+        tempEl.textContent = `${Math.round(currentTemp)}°C`;
+        descEl.textContent = desc;
+
+        const feelsText = apparent != null ? `${Math.round(apparent)}°C` : "—";
+
+        extraEl.innerHTML = `
+          <div>Ветер: ${Math.round(currentWind)} км/ч</div>
+          <div>Ощущается как: ${feelsText}</div>
+        `;
+
+        // прогноз
+        forecastGrid.innerHTML = "";
+        if (daily && daily.time) {
+          const maxItems = Math.min(3, daily.time.length);
+          for (let i = 0; i < maxItems; i++) {
+            const date = daily.time[i];
+            const tMax = daily.temperature_2m_max[i];
+            const tMin = daily.temperature_2m_min[i];
+            const code = daily.weathercode[i];
+
+            const item = document.createElement("div");
+            item.className = "forecast-item";
+            item.innerHTML = `
+              <div class="forecast-date">${formatDate(date)}</div>
+              <div class="forecast-desc">${weatherCodeMap[code] || "Погода"}</div>
+              <div class="forecast-temps">
+                Днём: <span>${Math.round(tMax)}°C</span><br/>
+                Ночью: <span>${Math.round(tMin)}°C</span>
+              </div>
+            `;
+            forecastGrid.appendChild(item);
+          }
+        }
+
+        setStatus("Готово. Данные обновлены.");
+      } catch (err) {
+        console.error(err);
+        setStatus("Произошла ошибка при загрузке погоды. Попробуйте ещё раз.", true);
+        locationEl.textContent = "Ошибка загрузки";
+        metaEl.textContent = "";
+        descEl.textContent = "Нет данных.";
+      }
+    }
+
+    searchBtn.addEventListener("click", () => {
+      fetchWeather(cityInput.value);
+    });
+
+    cityInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        fetchWeather(cityInput.value);
+      }
+    });
+
+    // Можно сразу попробовать загрузить погоду для Gorzów Wielkopolski при первой загрузке
+    window.addEventListener("load", () => {
+      cityInput.value = "Gorzów Wielkopolski";
+      fetchWeather(cityInput.value);
+    });
+  </script>
+</body>
+</html>
